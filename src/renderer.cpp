@@ -38,7 +38,7 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(Maze const maze, SDL_Point const &food) {
+void Renderer::Render(Maze const *maze, SDL_Point const &food) {
   
   SDL_Rect block;
   block.w = (screen_width) / grid_width;
@@ -59,13 +59,24 @@ void Renderer::Render(Maze const maze, SDL_Point const &food) {
   //SDL_RenderFillRect(sdl_renderer, &block);
 
   // Render maze cells
-  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-  for (Node const node : maze.nodes) {
-    node_block.x = node.p.x * block.w;
-    node_block.y = node.p.y * block.h;
+  for (auto const & node : maze->nodes) {
+    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    node_block.x = node->p.x * block.w;
+    node_block.y = node->p.y * block.h;
     SDL_RenderFillRect(sdl_renderer, &node_block);
   }
 
+  // Draw Connectivity lines between boxes
+  for (auto const & node : maze->nodes) {
+    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+    for (auto const edge : node->edges){
+      SDL_RenderDrawLine(sdl_renderer, 
+      node->p.x* block.w + block.w/2,
+      node->p.y* block.h + block.h/2,
+      edge->child->p.x* block.w + block.w/2,
+      edge->child->p.y* block.h + block.h/2);
+    }
+  }
   // Render snake's head
   // block.x = static_cast<int>(snake.head_x) * block.w;
   // block.y = static_cast<int>(snake.head_y) * block.h;

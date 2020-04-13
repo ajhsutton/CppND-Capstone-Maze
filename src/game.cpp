@@ -3,11 +3,10 @@
 #include "SDL.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height) :
-    maze(static_cast<int>(grid_width), static_cast<int>(grid_height)),
       engine(dev()),
       random_w(0, static_cast<int>(grid_width)),
       random_h(0, static_cast<int>(grid_height)) {
-
+  maze = Maze(static_cast<int>(grid_width), static_cast<int>(grid_height));
   //PlaceFood();
 }
 
@@ -27,7 +26,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running);
     Update();
-    renderer.Render(maze, food);
+    renderer.Render(&maze, food);
 
     frame_end = SDL_GetTicks();
 

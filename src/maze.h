@@ -2,53 +2,76 @@
 #define MAZE_H
 
 #include <vector>
+#include <array>
+#include <memory>
 
-// Structure defining a 2D point
+// Structure defining a 2D point for a spatial data graph
 struct Point
 {
     int x;
     int y;
 };
 
-class Edge;
+class EdgeState;
+class Node;
 
+// Directed Graph Edge; edges always exit parent node.
+// Edge state is synchronized through the common edge state object.
+struct Edge{
+    EdgeState * state;
+    Node * child;
+    Node * parent;
+    Edge(EdgeState *state, Node * child, Node * parent);
+};
+
+// EdgeState maintains the state of an Edge in a Graph
+class EdgeState
+{
+    public:
+        int val;
+        std::shared_ptr<Edge>  edge_1;
+        std::shared_ptr<Edge>  edge_2;
+        EdgeState(Node* node1, Node* node2);
+};
+
+// Node class for graph
+// TODO: Template class for use with generic data object @ node
 class Node {
     public:
         int id;
         Point p; 
         Node();
         Node(int id_, int px, int py);
+
         // TODO: Object Pointer
-        bool isConnectedToNode(Node *nodeB);
+        bool isConnectedToNode(Node const *nodeB);
+        void printEdges();
         std::vector<Point> getAdjacentPositions();
+        std::vector<std::shared_ptr<Edge>> edges;
     private:
-        std::vector<Edge> _edges;
         static int _idCnt;
 };
 
-class Edge{
-    public:
-        int state;
-        Node * child;
-        Node * parent;
-        Edge(Node *P, Node *C);
-};
-
-
 class Maze {
  public:
-  Maze(int grid_width, int grid_height);
-  
-  void Update();
-  std::vector<Node> nodes;
-  
+  Maze();
+  Maze(int grid_width, int grid_height); // Constructor
+  Maze(const Maze & maze) = delete; // Copy Constructor
+  Maze(Maze && maze); // Move Constructor
+  Maze &operator=(Maze &maze) = delete; // Copy Operator
+  Maze &operator=(Maze &&maze); // Move Assignment Opterator
+  ~Maze();
+
+  std::vector<std::unique_ptr<Node>> nodes;
+  std::vector<std::unique_ptr<EdgeState>> edgestates;
+
  private:
   int _width;
   int _height;
-  std::vector<Edge> edges;
-
+  
   Node * getNodeForPoint(Point const p);
-  void connectNodes(Node * nodeA, Node * nodeB);
+  void buildGrid();
+  void connectNodes(Node* nodeA, Node* nodeB);
 };
 
 #endif
