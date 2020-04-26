@@ -53,7 +53,15 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   }
 }
 
-void Game::Update() {}
+void Game::Update() {
+  // Update Visibility
+  maze.bot->node->state = NodeStates::visible;
+  for (auto &edge: maze.bot->node->edges){
+    if (edge->state->isOpen()){
+      edge->child->state =  NodeStates::visible;
+    }
+  }
+}
 
 int Game::GetScore() const { return score; }
 int Game::GetSize() const { return 0; }

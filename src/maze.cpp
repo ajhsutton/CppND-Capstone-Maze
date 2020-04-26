@@ -73,7 +73,6 @@ void Maze::connectNodes(Node* nodeA, Node* nodeB){
     }
 }
 
-
 // Use ordered grid for maze to get the nodes corresponding to a quantized offset.
 Node * Maze::getNodeForPoint(Point const p){
     // Generate from a 2D grid index based upon column-row order.

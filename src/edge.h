@@ -53,7 +53,7 @@ class EdgeState
 };
 
 // Node class for graph
-enum NodeStates {unvisited, visited};
+enum NodeStates {unvisited, visited, visible};
 
 // class Bot;
 
