@@ -41,12 +41,21 @@ Renderer::~Renderer() {
 void Renderer::Render(Maze const *maze, SDL_Point const &food) {
   
   SDL_Rect block;
-  block.w = (screen_width) / grid_width;
-  block.h = (screen_height) / grid_height;
+  block.w = (screen_width) / (grid_width +1);
+  block.h = (screen_height) / (grid_height + 1);
+
+  // Border Offset from frame
+  // TODO: SDL *may* allow new origin definition
+  auto offset_x = block.w/2;
+  auto offset_y = block.h/2;
 
   SDL_Rect node_block;
-  node_block.w = (screen_width - grid_width) / grid_width;
-  node_block.h = (screen_height - grid_height) / grid_height;
+  node_block.w = ((screen_width  - block.w) - grid_width) / grid_width;
+  node_block.h = ((screen_height - block.h) - grid_height) / grid_height;
+  
+  SDL_Rect bot_block;
+  bot_block.w = node_block.w / 2;
+  bot_block.h = node_block.h / 2;
 
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
@@ -61,31 +70,56 @@ void Renderer::Render(Maze const *maze, SDL_Point const &food) {
   // Render maze cells
   for (auto const & node : maze->nodes) {
     SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    node_block.x = node->p.x * block.w;
-    node_block.y = node->p.y * block.h;
+    node_block.x = node->p.x * block.w + offset_x;
+    node_block.y = node->p.y * block.h + offset_y;
     SDL_RenderFillRect(sdl_renderer, &node_block);
   }
 
   // Draw Connectivity lines between boxes
+  // SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
   for (auto const & node : maze->nodes) {
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
     for (auto const edge : node->edges){
-      SDL_RenderDrawLine(sdl_renderer, 
-      node->p.x* block.w + block.w/2,
-      node->p.y* block.h + block.h/2,
-      edge->child->p.x* block.w + block.w/2,
-      edge->child->p.y* block.h + block.h/2);
+      if (edge->isOpen()){
+        auto p1_x = node->p.x* block.w        ;
+        auto p2_x = edge->child->p.x* block.w ;
+        auto p1_y = node->p.y* block.h        ;
+        auto p2_y = edge->child->p.y* block.h ;
+        
+        // Fill-in gap
+        SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        auto mid_x = (p1_x + p2_x)/2;
+        auto mid_y = (p1_y + p2_y)/2;
+        node_block.x = mid_x + offset_x;
+        node_block.y = mid_y + offset_y;
+         SDL_RenderFillRect(sdl_renderer, &node_block);
+      } 
     }
   }
-  // Render snake's head
-  // block.x = static_cast<int>(snake.head_x) * block.w;
-  // block.y = static_cast<int>(snake.head_y) * block.h;
-  // if (snake.alive) {
-  //   SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0x7A, 0xCC, 0xFF);
-  // } else {
-  //   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
-  // }
-  // SDL_RenderFillRect(sdl_renderer, &block);
+
+  // Draw Line
+  for (auto const & node : maze->nodes) {
+    for (auto const edge : node->edges){
+      if (edge->isOpen()){
+        auto p1_x = node->p.x* block.w        ;
+        auto p2_x = edge->child->p.x* block.w ;
+        auto p1_y = node->p.y* block.h        ;
+        auto p2_y = edge->child->p.y* block.h ;
+        SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0x10);
+        SDL_RenderDrawLine(sdl_renderer, 
+          p1_x+ block.w/2 + offset_x, 
+          p1_y+ block.h/2 + offset_y,
+          p2_x+ block.w/2 + offset_x, 
+          p2_y+ block.h/2 + offset_x);
+      }
+    }
+  }
+
+  // Render Bot
+  SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0xFF, 0x00, 0xFF);
+  Point bot_pos = maze->bot->getPosition();
+  bot_block.x = (bot_pos.x + 0.25) * block.w + offset_x; // + block.w;
+  bot_block.y = (bot_pos.y + 0.25) * block.h + offset_y;// + block.h;
+  SDL_RenderFillRect(sdl_renderer, &bot_block);
 
   // Update Screen
   SDL_RenderPresent(sdl_renderer);

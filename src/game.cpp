@@ -18,13 +18,15 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   Uint32 frame_duration;
   int frame_count = 0;
   bool running = true;
+  std::cout << "Add Bot" << std::endl;
+  maze.addBot();
 
   while (running) {
     frame_start = SDL_GetTicks();
     //std::cout << "Frame" << std::endl;
 
     // Input, Update, Render - the main game loop.
-    controller.HandleInput(running);
+    controller.HandleInput(running, maze.bot);
     Update();
     renderer.Render(&maze, food);
 

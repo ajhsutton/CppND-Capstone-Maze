@@ -1,15 +1,14 @@
 #include "controller.h"
 #include <iostream>
 #include "SDL.h"
-// #include "snake.h"
+#include "bot.h"
 
-// void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
-//                                  Snake::Direction opposite) const {
-//   if (snake.direction != opposite || snake.size == 1) snake.direction = input;
-//   return;
-// }
+void Controller::MoveBot(Bot *bot, Bot::Direction input) const {
+  bot->moveDirection(input);
+  return;
+}
 
-void Controller::HandleInput(bool &running) const {
+void Controller::HandleInput(bool &running, Bot * bot) const {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
@@ -17,23 +16,23 @@ void Controller::HandleInput(bool &running) const {
     } else if (e.type == SDL_KEYDOWN) {
       switch (e.key.keysym.sym) {
         case SDLK_UP:
-          //ChangeDirection(snake, Snake::Direction::kUp,
-          //                Snake::Direction::kDown);
+          MoveBot(bot, Bot::Direction::kDown);
+          std::cout << "UP" << std::endl;
           break;
 
         case SDLK_DOWN:
-          // ChangeDirection(snake, Snake::Direction::kDown,
-                          // Snake::Direction::kUp);
+          MoveBot(bot, Bot::Direction::kUp);
+          std::cout << "DOWN" << std::endl;
           break;
 
         case SDLK_LEFT:
-          // ChangeDirection(snake, Snake::Direction::kLeft,
-          //                 Snake::Direction::kRight);
+          MoveBot(bot, Bot::Direction::kLeft);
+          std::cout << "LEFT" << std::endl;
           break;
 
         case SDLK_RIGHT:
-          // ChangeDirection(snake, Snake::Direction::kRight,
-          //                 Snake::Direction::kLeft);
+          MoveBot(bot, Bot::Direction::kRight);
+          std::cout << "RIGHT" << std::endl;
           break;
       }
     }
