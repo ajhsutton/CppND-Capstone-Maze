@@ -17,7 +17,7 @@ Renderer::Renderer(const std::size_t screen_width,
   }
 
   // Create Window
-  sdl_window = SDL_CreateWindow("Snake Game", SDL_WINDOWPOS_CENTERED,
+  sdl_window = SDL_CreateWindow("Maze Game", SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED, screen_width,
                                 screen_height, SDL_WINDOW_SHOWN);
 
@@ -39,7 +39,7 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(Maze const *maze, SDL_Point const &food) {
+void Renderer::Render(Maze const *maze) {
   
   SDL_Rect block;
   block.w = (screen_width) / (grid_width +1);
@@ -89,8 +89,9 @@ void Renderer::Render(Maze const *maze, SDL_Point const &food) {
           auto p1_y = node->p.y* block.h        ;
           auto p2_y = edge->child->p.y* block.h ;
           
-          // Fill-in gap
+          
           SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+          
           auto mid_x = (p1_x + p2_x)/2;
           auto mid_y = (p1_y + p2_y)/2;
           node_block.x = mid_x + offset_x;
@@ -99,6 +100,15 @@ void Renderer::Render(Maze const *maze, SDL_Point const &food) {
         } 
       }
     }
+  }
+
+  // Draw Goal
+  if (maze->goal->state == NodeStates::visible){
+    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+    Point goal_pos = maze->goal->p;
+    bot_block.x = (goal_pos.x + 0.25) * block.w + offset_x; // + block.w;
+    bot_block.y = (goal_pos.y + 0.25) * block.h + offset_y;// + block.h;
+    SDL_RenderFillRect(sdl_renderer, &bot_block);
   }
 
   // Draw Line
@@ -131,6 +141,6 @@ void Renderer::Render(Maze const *maze, SDL_Point const &food) {
 }
 
 void Renderer::UpdateWindowTitle(int score, int fps) {
-  std::string title{"Snake Score: " + std::to_string(score) + " FPS: " + std::to_string(fps)};
+  std::string title{"Game Score: " + std::to_string(score) + " FPS: " + std::to_string(fps)};
   SDL_SetWindowTitle(sdl_window, title.c_str());
 }

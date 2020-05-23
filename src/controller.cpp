@@ -17,22 +17,22 @@ void Controller::HandleInput(bool &running, Bot * bot) const {
       switch (e.key.keysym.sym) {
         case SDLK_UP:
           MoveBot(bot, Bot::Direction::kDown);
-          std::cout << "UP" << std::endl;
+          // std::cout << "UP" << std::endl;
           break;
 
         case SDLK_DOWN:
           MoveBot(bot, Bot::Direction::kUp);
-          std::cout << "DOWN" << std::endl;
+          // std::cout << "DOWN" << std::endl;
           break;
 
         case SDLK_LEFT:
           MoveBot(bot, Bot::Direction::kLeft);
-          std::cout << "LEFT" << std::endl;
+          // std::cout << "LEFT" << std::endl;
           break;
 
         case SDLK_RIGHT:
           MoveBot(bot, Bot::Direction::kRight);
-          std::cout << "RIGHT" << std::endl;
+          // std::cout << "RIGHT" << std::endl;
           break;
       }
     }

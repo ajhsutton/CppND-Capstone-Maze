@@ -35,6 +35,7 @@ class Edge{
 
     void openEdge();
     bool isOpen();
+    void print();
 };
 
 // EdgeState maintains the state of an Edge in a Graph
@@ -62,20 +63,20 @@ class Node {
     public:
         int id;
         Point p; 
-
         NodeStates state;
+        std::vector<std::shared_ptr<Edge>> edges;
+        std::unique_ptr<Bot> bot;
+
         Node();
         Node(int id_, int px, int py);
 
-        // TODO: Object Pointer
         bool isConnectedToNode(Node const *nodeB);
+        bool isValidMove(Node const *nodeB);
         void printEdges();
         Point getLocation(){return Point(p.x, p.y);};
+        std::vector<Edge *> getValidEdges();
         std::vector<Point> getAdjacentPositions();
-        std::vector<std::shared_ptr<Edge>> edges;
-        std::unique_ptr<Bot> bot;
         void moveBot(Node *newNode);
-
         bool hasBot() {return bot != nullptr;};
     private:
         static int _idCnt;

@@ -20,8 +20,18 @@ class Maze {
   void printNodes();
   void printEdges();
 
+  //search
+  std::vector<Node *> getBoundaryNodes();
+  void printBoundary();
+  std::vector<Node *> findPathToNode(Node * current,
+     const Node * target, const Node * parent);
+   int distanceToGoal(Node * node);
+   
+  // Bot
   Bot * bot;
   void addBot();
+
+  Node * goal;
 
   std::vector<std::unique_ptr<Node>> nodes;
   std::vector<std::unique_ptr<EdgeState>> edgestates;
@@ -33,6 +43,9 @@ class Maze {
   Node * getNodeForPoint(Point const p);
   void buildGrid();
   void connectNodes(Node* nodeA, Node* nodeB);
+
+  bool containsnode(std::vector<Node *> nodes, Node * node);
+  std::vector<Node *> getchildnodes(Node * current);
 };
 
 #endif

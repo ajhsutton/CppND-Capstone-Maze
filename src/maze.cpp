@@ -12,11 +12,10 @@ Maze::Maze(){
     _height = 0;
 }
 
-Maze::Maze(int grid_width, int grid_height){
-
-    // Init area variables and bild grid.
-    _width = grid_width;
-    _height = grid_height;
+Maze::Maze(int grid_width, int grid_height):_width(grid_width),_height(grid_height){
+    // Initialize a MAze object to the argument dimensions.
+    // Maze is constructed by a MazeBuilder, and start / finish nodes established.
+    
     std::cout << "Build Grid" << std::endl;
     buildGrid();
 
@@ -41,13 +40,15 @@ Maze::Maze(int grid_width, int grid_height){
             //}
         }
     }
-    //std::cout << "Build Maze [Start]" << std::endl;
+
     // Build Maze
     MazeBuilder mb(this);
     Node * startNode = nodes.front().get();
     startNode->printEdges();
     mb.buildMaze(startNode);
-    //std::cout << "Build Maze [Complete]" << std::endl;
+
+    // Select Goal
+    goal = this->getNodeForPoint(Point(_width-1,_height-1));
 }
 
 // Generate a grid of nodes for maze. Nodes are unconnected
@@ -79,7 +80,6 @@ Node * Maze::getNodeForPoint(Point const p){
     if ((p.x >= _width) || (p.x < 0)){
         return nullptr;
     }
-    
     if ((p.y >= _height) || (p.y < 0)){
         return nullptr;
     }
@@ -96,6 +96,7 @@ Node * Maze::getNodeForPoint(Point const p){
     return  outNode;
 }
 
+// Print all nodes in the maze (debugging)
 void Maze::printNodes(){
     int ii = 1;
     for (auto & node : nodes){
@@ -109,6 +110,7 @@ void Maze::printNodes(){
     std::cout << std::endl;
 }
 
+// Print all edges in the maze (debugging)
 void Maze::printEdges(){
     int ii = 1;
     std::cout << "-- Edges --" << std::endl;
@@ -123,14 +125,14 @@ void Maze::printEdges(){
     std::cout << std::endl;
 }
 
-// Maze Traversal
-// return a std::vector of Edges leading to open nodes.
+// Maze Traversal, a std::vector of Edges leading to open nodes.
 void Maze::getOpenEdges(Node const *node, std::vector<Edge *> *openEdges){
     for (auto edge: node->edges){
         if ((edge != nullptr)&(edge->child->state == unvisited)){
             openEdges->push_back(edge.get());
         }
     }
+    
     // Shuffle order of output edges
     std::random_device rd;
     std::mt19937_64 g(rd());
@@ -143,6 +145,75 @@ void Maze::addBot(){
     bot = this->nodes.front()->bot.get();
     this->nodes.front()->bot->setNode(this->nodes.front().get());
 }
+
+// Find boundary nodes.
+// Returns a vector of Nodes, representing the unexplored boundary. 
+// A node is unexplored if it is adjacennt to non-visible nodes.
+std::vector<Node *> Maze::getBoundaryNodes(){
+    std::vector<Node *> outlist;
+    for (auto & node : nodes){
+        if (node->state == NodeStates::visible){
+            for (auto & edge: node->edges){
+                if ((edge->isOpen()) && !(edge->child->state == NodeStates::visible)){
+                    outlist.push_back(edge->child);
+                }
+            }
+         }
+    }
+    return outlist;
+}
+
+// Print all nodes on the boundary.
+void Maze::printBoundary(){
+    auto bdry = getBoundaryNodes();
+    for (auto node : bdry){
+        std::cout << node->p.x << " , " << node->p.y << "(d = " << distanceToGoal(node) << ")"<< std::endl;
+    }
+}
+
+// Search for path between nodes
+std::vector<Node *> Maze::findPathToNode(Node * current, const Node * target, const Node * parent){
+    std::vector<Node *> path;
+    if (current == target){
+        // std::cout << "Path Found" << std::endl;
+        path.push_back(current);
+    } else {
+        // For each edge;
+        for (auto & edge : current->edges){
+            // if edge-> child isn't the originating parent (acyclic graph)
+            // get subtree distances.
+            if ((edge->isOpen()) &&(edge->child != parent)){
+                // edge->print();
+                Node * childNode = edge->child;
+                auto subpath = findPathToNode(childNode, target, current);
+                if (subpath.size() > 0){
+                    subpath.push_back(current);
+                    return subpath;
+                }
+            }
+        }
+    }
+    return path;    
+}
+// Return the manhattan distance to the goal node
+int Maze::distanceToGoal(Node * node){
+    int px = node->p.x;
+    int py = node->p.y;
+    int gx = goal->p.x;
+    int gy = goal->p.y;
+    return abs(px - gx) + abs(py-gy);
+}
+
+// subtree or path of nodes, contains a target node.
+bool Maze::containsnode(std::vector<Node *> nodes, Node * testnode){
+    for (auto node : nodes){
+        if (node == testnode){
+            return true;
+        }
+    }
+    return false;
+}
+
 
 // Move Semantics
 // Move Constructor
@@ -160,6 +231,9 @@ Maze::Maze(Maze && maze){
         edgestates.emplace_back(std::move(edgestate));
     }
 
+    goal = maze.goal;
+    maze.goal = nullptr;
+
     // Invalidate Source
     maze._width = 0;
     maze._height = 0;
@@ -167,7 +241,7 @@ Maze::Maze(Maze && maze){
     maze.nodes.clear();
 }
 
-// Copy Operator
+// Copy Operators
 // Maze& Maze::operator=(Maze &maze){
 // }
  // Move Assignment Opterator
@@ -190,6 +264,9 @@ Maze& Maze::operator=(Maze &&maze){
     for (auto & edgestate: maze.edgestates){
         edgestates.emplace_back(std::move(edgestate));
     }
+
+    goal = maze.goal;
+    maze.goal = nullptr;
 
     // Invalidate Source
     maze._width = 0;

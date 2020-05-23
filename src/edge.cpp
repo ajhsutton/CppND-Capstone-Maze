@@ -73,6 +73,10 @@ EdgeState::EdgeState(Node* node1, Node* node2)
     // std::cout << "   Edge 2:" << edge_2->parent << "->" << edge_2->child << std::endl;
 }
 
+void Edge::print(){
+    std::cout << "Edge: (" << parent->p.x << "," << parent->p.y << ") ->  (" << child->p.x << "," << child->p.y << ")" << std::endl;
+}
+
 // Static Variable
 int Node::_idCnt = 0;
 
@@ -112,6 +116,18 @@ bool Node::isConnectedToNode(Node const *nodeB){
     return false;
 }
 
+bool Node::isValidMove(Node const *nodeB){
+    if (edges.size() > 0){
+        int ii = 1;
+        for (auto edge: edges){
+            if (edge->child == nodeB){
+                return edge->state->isOpen();
+            }
+        }
+    }
+    return false;
+}
+
 std::vector<Point> Node::getAdjacentPositions(){
     std::vector<Point> out;
     for (int pos =0; pos < 4; pos++){
@@ -136,8 +152,20 @@ std::vector<Point> Node::getAdjacentPositions(){
     return out;
 }
 
+std::vector<Edge *> Node::getValidEdges(){
+    std::vector<Edge *> validEdges;
+    for (auto & edge : edges){
+        if (edge->state->isOpen()){
+            validEdges.push_back(edge.get());
+        }
+    }
+    return validEdges;
+}
+
 void Node::moveBot(Node *newNode){
-    std::cout << "moveBot" << std::endl;
-    newNode->bot = std::move(bot);
-    newNode->bot->node = newNode;
+    //std::cout << "moveBot" << std::endl;
+    if (isValidMove(newNode)){
+        newNode->bot = std::move(bot);
+        newNode->bot->node = newNode;
+    }
 }
