@@ -12,7 +12,7 @@ The robot can be moved using the keyboard arrow keys.
 If the player does not move for 2 seconds, the game moves into Automatic mode, where a search algorithim is applied to determine the 'optimal' move for the robot. Further details of the move optimization logic is below.
 
 ## Implementation
-# Maze Construction
+### Maze Construction
 The Maze is constructed using an underlying graph representation, where each graph node represents each open cell, while edges denote adjacent cells. Each edge is allowed to be Open or Closed, representing the existance or absence of a wall which prevents movement between nods. 
 
 The Edge object was designed to be bi-drectional, whilst maintaining a single (common) state. For example, if node A and node B are adjacent, node A maintains a list (std::vector) of edges departing itself. Node B maintains a similar list. These edges are directed; such that for edges connecting from node A to node B will have node A as parent, and node B as child. The complementary edge from B to A will accordingly have Node B as parent and Node A as child. This structure simplifies traversal of the graph using parent-child relationships.
@@ -21,7 +21,7 @@ The maze itself is constructed following the algorithm described in [Wikipedia](
 
 As such, the algorithm implements a depth-first expansion that guarantees all nodes are expanded without cycles/loops.
 
-# Auto-solve Mode
+### Auto-solve Mode
 If the player does not make a move for 2 seconds, the robot is moved into automatic-solve mode. In this mode, the robot choose its own moves by selecting a 'boundary' cell to investigate. Boundary cells are cells that are connected to a visible cell, but are not yet visible (e.g. have not been explored yet). Note, visiting/expanding the 'Boundary' cells is the only option to expand the maze (all other cells have either been visited already, or require transiting through a Boundary cell.
 
 The maze logic is capable of :
@@ -32,7 +32,7 @@ The identification function is a simple search over all nodes.
 
 The path generation is implemented using a graph search algorithm on the maze. The maze structure ensures the maze can be represented by an acylic-graph (no loops). The underlying maze data structure is an undirected graph. The graph search starts at the robot's location, and recursively expandes the sub-graph along each edge. The recursion terminates is either a dead-end is reached or if the goal node is found. In the case the goal is discovered, the path to the node (found via the recursive steps) is returned and the first node expanded. 
 
-# Optimization
+### Optimization
 Multiple Bounday cells may exist due to branches in the Maze. A heuristic function is used to determine the 'optimal' boundary cell for expansion by minimizing a cost function. The cost includes:
 1. The cost to navigate the robot along an identified maze path to the boundary cell.
 2. The Manhattan distance from the boundary cell to the goal (since the real path is not-yet visible).
